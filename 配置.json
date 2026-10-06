@@ -1,0 +1,10 @@
+{
+  "_说明": "改这里就行，改完双击 启动.ps1。带下划线的键是注释，程序不读。",
+  "vps": "root@你的服务器IP",
+  "sshKey": "C:\\Users\\你的用户名\\.ssh\\id_ed25519",
+  "tunnelPort": 1080,
+  "gatewayPort": 8877,
+  "nodePath": "",
+  "默认网址": "https://example.com/",
+  "_nodePath说明": "留空 = 用 PATH 里的 node；也可以写 node.exe 的完整路径"
+}

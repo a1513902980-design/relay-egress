@@ -1,0 +1,24 @@
+不是 Windows 的人用这三行（网关本身与系统无关，只用 Node 内置模块）：
+
+  # 1) 隧道（把 你的用户名/你的服务器 换掉）
+  ssh -N -D 127.0.0.1:1080 你的用户名@你的服务器IP &
+
+  # 2) 网关（唯一出网口；它只允许拨 127.0.0.1，拨别的会直接拒绝启动）
+  node gateway.mjs --port 8877 --up 1080 --log ./run/gateway.log --state ./run/state.json
+
+  # 3) 一个浏览器窗口，所有请求经网关出 VPS（网关同时会说 SOCKS5 和 HTTP 代理）
+  chromium --user-data-dir=./browser-profile --proxy-server="socks5://127.0.0.1:8877" \
+           --proxy-bypass-list="<-loopback>" --disable-quic https://example.com/
+
+验一下是不是真的走 VPS：在该窗口打开 http://ip.3322.net ，显示的应该是 VPS 的 IP，
+不该是你自己的宽带 IP。自证不会直连（不需要服务器）：
+
+  node gw_selftest.mjs        # 期望 SELFTEST_OK（9/9）
+
+停：关掉浏览器、^C 掉 node、kill 掉那个 ssh。
+注意：这套在 Linux/Mac 上不含"链路上进程出网审计"（那一份是 PowerShell 写的，只在 Windows 用）。
+
+（2026-10-06 实录：在一台 Kali 客机里按上面这套真跑过一遍 —— 自检 SELFTEST_OK 9/9、
+ 上游写成公网地址时网关拒绝启动（退出码 2）、拔掉上游后经网关的请求必失败且不回退直连
+ （curl 退出码 52、日志出现 GW_UP_FAIL、action=client_connection_reset_no_fallback）。
+ 那台客机自带 node v24.18.0，全程不需要管理员。原始输出见打包人工作流里的 out\_kali_cleanroom_evidence.txt）
